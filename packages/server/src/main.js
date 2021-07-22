@@ -1,39 +1,22 @@
-import { createServer } from 'http';
-import { parse } from 'querystring';
+import express from 'express';
+import cors from 'cors';
 
-const server = createServer((request, response) => {
-    switch(request.url){
-        case '/status': {
-            response.writeHead(200, {
-                'Content-type': 'application/json'
-            });
-            response.write(JSON.stringify({
-                status: 'okay',
-            }    
-            ));
-            response.end();
-            break;
-        }
-        
+const server = express();
 
-        case '/authenticate': {
-            let data = "";
-            request.on('data', (chunck) => {
-                data += chunck;
-            });
-            request.on('end', () => {
-                const status = parse(data)
-                response.end();
-            })
-            break;
-        }
+server.get('/status', (_, response) => {
+    response.send({
+        status: 'Okay',
+    });
+});
 
-        default: {
-            response.writeHead(404, 'Service not found');
-            response.end();
-        }
-    }
-})
+const enableCors = cors({origin: 'http://localhost:3000'})
+
+server
+    .options('/authenticate', enableCors)
+    .post('/authenticate', enableCors, express.json(), (request, response) => {
+    console.log('E-mail', request.body.email,'Senha', request.body.password);
+    response.send({Okay: true,});
+});
 
 // configurar porta e hostname
 // caso há mais de uma palicação
